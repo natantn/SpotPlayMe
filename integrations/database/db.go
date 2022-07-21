@@ -1,4 +1,4 @@
-package database
+package integrations
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	db  *gorm.DB
+	DB  *gorm.DB
 	err error
 )
 
@@ -22,12 +22,12 @@ func ConectDB() {
 	dbConn["user"] = os.Getenv("db_user")
 	dbConn["password"] = os.Getenv("db_password")
 
-	stringConn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", 
+	stringConn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		dbConn["host"], dbConn["user"], dbConn["password"], dbConn["name"], dbConn["port"])
-	db, err = gorm.Open(postgres.Open(stringConn))
+	DB, err = gorm.Open(postgres.Open(stringConn))
 	if err != nil {
 		panic(err.Error())
 	}
-	db.AutoMigrate(&models.Playlist{})
-	db.AutoMigrate(&models.Music{})
+	DB.AutoMigrate(&models.Playlist{})
+	DB.AutoMigrate(&models.Music{})
 }
