@@ -8,4 +8,5 @@ type Music struct {
 	Artist string `json:"artist"`
 	Album string `json:"album"`
 	ReleaseDate string `json:"release_date"`
+	SpotifyID string `json:"spotify_id"`
 }
