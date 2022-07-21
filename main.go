@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/natantn/SpotPlayMe/integrations/database"
+	integrations "github.com/natantn/SpotPlayMe/integrations/database"
 	"github.com/natantn/SpotPlayMe/routes"
 )
 
@@ -11,7 +11,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	
-	database.ConectDB()
+
+	integrations.ConectDB()
 	routes.HandleRequests()
 }
