@@ -30,4 +30,6 @@ func ConectDB() {
 	}
 	DB.AutoMigrate(&models.Playlist{})
 	DB.AutoMigrate(&models.Music{})
+	DB.AutoMigrate(&models.PlaylistMusics{})
+	DB.SetupJoinTable(&models.Playlist{}, "Musics", &models.PlaylistMusics{})
 }

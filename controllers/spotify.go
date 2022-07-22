@@ -59,6 +59,17 @@ func SyncPlaylists(c *gin.Context) {
 
 		database.DB.Save(&playlist)
 		DatabasePlaylists = append(DatabasePlaylists, &playlist)
+
+		for seq, music := range playlist.Musics{
+			trackInPlaylist := models.PlaylistMusics{
+				PlaylistID: int(playlist.ID),
+				MusicID: int(music.ID),
+			}
+			database.DB.First(&trackInPlaylist)
+			trackInPlaylist.ReprodutionSequence = seq+1
+
+			database.DB.Save(&trackInPlaylist)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

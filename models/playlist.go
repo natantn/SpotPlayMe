@@ -10,3 +10,9 @@ type Playlist struct {
 	// SpotifyDateCreation string `json:"spotify_date_creation"`
 	Musics []Music `gorm:"many2many:playlist_musics;"`
 }
+
+type PlaylistMusics struct {
+	PlaylistID          int `gorm:"primaryKey"`
+	MusicID             int `gorm:"primaryKey"`
+	ReprodutionSequence int
+}
