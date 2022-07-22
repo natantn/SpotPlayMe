@@ -30,7 +30,7 @@ func SyncPlaylists(c *gin.Context) {
 	for _, playlistFetched := range spotContext.PlaylistsFetched {
 		playlist := models.Playlist{}
 
-		database.DB.Where(&models.Playlist{SpotifyID: playlist.SpotifyID}).FirstOrCreate(&playlist)
+		database.DB.Where(&models.Playlist{SpotifyID: playlistFetched.ID}).FirstOrCreate(&playlist)
 
 		playlist.Title = playlistFetched.Name
 		playlist.Description = playlistFetched.Description
@@ -39,17 +39,20 @@ func SyncPlaylists(c *gin.Context) {
 		for _, track := range playlistFetched.Tracks.Items {
 			music := models.Music{}
 			database.DB.Where(&models.Music{SpotifyID: track.Track.ID}).FirstOrCreate(&music)
-
+			
 			music.Title = track.Track.Name
 			music.Album = track.Track.Album.Name
 			music.ReleaseDate = track.Track.Album.ReleaseDate
-			for i, artist := range track.Track.Artists {
-				music.Artist += fmt.Sprintf(" %s", artist.Name)
+
+			artist := ""
+			for i, artistName := range track.Track.Artists {
+				artist += fmt.Sprintf("%s", artistName.Name)
 				if i < len(track.Track.Artists)-1 {
-					music.Artist += ","
+					music.Artist += " ,"
 				}
 			}
-
+			if music.Artist != artist { music.Artist = artist }
+						
 			database.DB.Save(&music)
 			playlist.Musics = append(playlist.Musics, music)
 		}
