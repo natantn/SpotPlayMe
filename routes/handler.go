@@ -11,5 +11,7 @@ func HandleRequests() {
 	r.GET("/spotify/token", controllers.GetToken)
 	r.GET("/spotify/sync", controllers.SyncPlaylists)
 
+	r.GET("/musics", controllers.SearchMusic)
+
 	r.Run()
 }
