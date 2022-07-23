@@ -15,7 +15,7 @@ func SearchMusic(c *gin.Context) {
 
 	musics := services.GetMusicsByTitle(title)
 	if len(*musics) == 0 {
-		c.JSON(http.StatusNoContent, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status": "Música não encontrada em playlists cadastradas no banco",
 		})
 		return

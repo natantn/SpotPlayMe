@@ -40,13 +40,10 @@ func GetMusicOccorrencesInPlaylists(musics *[]models.Music) *[]dtos.MusicFound {
 			findMusicOccorrunceInPlaylist := func(playlistID, seq int) (music models.Music) {
 				occorruces := models.PlaylistMusics{}
 				err := database.DB.Where("playlist_id = ? AND reprodution_sequence = ?", playlistID, seq).First(&occorruces).Error
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					return models.Music{}
-				} else {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
 					database.DB.First(&music, occorruces.MusicID)
-					return
 				}
-
+				return
 			}
 
 			previousMusic := findMusicOccorrunceInPlaylist(occurrence.PlaylistID, seq-1)
