@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -28,48 +27,36 @@ func SyncPlaylists(c *gin.Context) {
 	DatabasePlaylists := []*models.Playlist{}
 
 	for _, playlistFetched := range spotContext.PlaylistsFetched {
-		playlist := models.Playlist{}
 
-		database.DB.Where(&models.Playlist{SpotifyID: playlistFetched.ID}).FirstOrCreate(&playlist)
-
-		playlist.Title = playlistFetched.Name
-		playlist.Description = playlistFetched.Description
-		playlist.SpotifyID = playlistFetched.ID
-
+		playlistMusics := []models.Music{}
 		for _, track := range playlistFetched.Tracks.Items {
 			music := models.Music{}
 			database.DB.Where(&models.Music{SpotifyID: track.Track.ID}).FirstOrCreate(&music)
-			
-			music.Title = track.Track.Name
-			music.Album = track.Track.Album.Name
-			music.ReleaseDate = track.Track.Album.ReleaseDate
+			hasChanged := music.FillFetchedMusic(&track.Track)
+			if hasChanged {	database.DB.Save(&music) }
 
-			artist := ""
-			for i, artistName := range track.Track.Artists {
-				artist += fmt.Sprintf("%s", artistName.Name)
-				if i < len(track.Track.Artists)-1 {
-					music.Artist += " ,"
-				}
-			}
-			if music.Artist != artist { music.Artist = artist }
-						
-			database.DB.Save(&music)
-			playlist.Musics = append(playlist.Musics, music)
+			playlistMusics = append(playlistMusics, music)
 		}
 
-		database.DB.Save(&playlist)
-		DatabasePlaylists = append(DatabasePlaylists, &playlist)
+		playlist := models.Playlist{}
+		database.DB.Where(&models.Playlist{SpotifyID: playlistFetched.ID}).FirstOrCreate(&playlist)
+		hasChanged := playlist.FillFetchedPlaylist(playlistFetched, &playlistMusics)
+		if hasChanged {	database.DB.Save(&playlist) }
 
-		for seq, music := range playlist.Musics{
+		for seq, music := range playlist.Musics {
 			trackInPlaylist := models.PlaylistMusics{
 				PlaylistID: int(playlist.ID),
-				MusicID: int(music.ID),
+				MusicID:    int(music.ID),
 			}
 			database.DB.First(&trackInPlaylist)
-			trackInPlaylist.ReprodutionSequence = seq+1
+			if trackInPlaylist.ReprodutionSequence != seq + 1 {
+				trackInPlaylist.SetMusicSequenceInPlaylist(seq + 1)
+				database.DB.Save(&trackInPlaylist)
+			}
 
-			database.DB.Save(&trackInPlaylist)
 		}
+
+		DatabasePlaylists = append(DatabasePlaylists, &playlist)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

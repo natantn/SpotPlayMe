@@ -27,19 +27,21 @@ type PlaylistApiResponse struct {
 	ID          string `json:"id"`
 	Tracks      struct {
 		Items []struct {
-			Track struct {
-				Album struct {
-					Name        string `json:"name"`
-					ReleaseDate string `json:"release_date"`
-				} `json:"album"`
-				Artists []struct {
-					Name string `json:"name"`
-				} `json:"artists"`
-				ID   string `json:"id"`
-				Name string `json:"name"`
-			} `json:"track"`
+			Track TrackInPlaylistApiResponse `json:"track"`
 		} `json:"items"`
 	} `json:"tracks"`
+}
+
+type TrackInPlaylistApiResponse struct {
+	Album struct {
+		Name        string `json:"name"`
+		ReleaseDate string `json:"release_date"`
+	} `json:"album"`
+	Artists []struct {
+		Name string `json:"name"`
+	} `json:"artists"`
+	ID   string `json:"id"`
+	Name string `json:"name"`	
 }
 
 type PlaylistItemResponse struct {
