@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	spotifyAPI "github.com/natantn/SpotPlayMe/integrations/spotify"
+	"github.com/natantn/SpotPlayMe/dtos"
 	"gorm.io/gorm"
 )
 
@@ -16,22 +16,22 @@ type Music struct {
 	SpotifyID   string `json:"spotify_id"`
 }
 
-func (m *Music) FillFetchedMusic(mf *spotifyAPI.TrackInPlaylistApiResponse) bool {
+func (m *Music) FillFetchedMusic(mf *dtos.TrackItemInPlaylistResponse) bool {
 	updated := false
 
 	if m.Title != mf.Name {
 		m.Title = mf.Name
 		updated = true
 	}
-	if m.Album != mf.Album.Name { 
-		m.Album = mf.Album.Name 
+	if m.Album != mf.Album.Name {
+		m.Album = mf.Album.Name
 		updated = true
 	}
 	if m.ReleaseDate != mf.Album.ReleaseDate {
 		m.ReleaseDate = mf.Album.ReleaseDate
 		updated = true
 	}
-	
+
 	artist := ""
 	for i, artistName := range mf.Artists {
 		artist += fmt.Sprintf("%s", artistName.Name)

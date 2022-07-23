@@ -7,50 +7,29 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/natantn/SpotPlayMe/dtos"
+)
+
+var (
+	SpotifyContext *Spotify
 )
 
 type Spotify struct {
 	Username         string
 	AccessToken      *AccessToken
-	PlaylistsFetched []*PlaylistApiResponse
+	PlaylistsFetched []*dtos.PlaylistApiResponse
 }
 
 type AccessToken struct {
-	Token     string `json:"access_token"`
-	Type      string `json:"token_type"`
-	ExpiresIn int    `json:"expires_in"`
+	Token     string    `json:"access_token"`
+	Type      string    `json:"token_type"`
+	GeneratedAt time.Time `json:"generated_at"`
+	ExpiresIn int       `json:"expires_in"`
 }
 
-type PlaylistApiResponse struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	ID          string `json:"id"`
-	Tracks      struct {
-		Items []struct {
-			Track TrackInPlaylistApiResponse `json:"track"`
-		} `json:"items"`
-	} `json:"tracks"`
-}
-
-type TrackInPlaylistApiResponse struct {
-	Album struct {
-		Name        string `json:"name"`
-		ReleaseDate string `json:"release_date"`
-	} `json:"album"`
-	Artists []struct {
-		Name string `json:"name"`
-	} `json:"artists"`
-	ID   string `json:"id"`
-	Name string `json:"name"`	
-}
-
-type PlaylistItemResponse struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	ID          string `json:"id"`
-}
-
-func GenerateToken() *AccessToken {
+func GenerateNewToken() *AccessToken {
 	clientId := os.Getenv("spotify_client_id")
 	clientSecret := os.Getenv("spotify_client_secret")
 
@@ -73,23 +52,14 @@ func GenerateToken() *AccessToken {
 
 	token := &AccessToken{}
 	json.NewDecoder(resp.Body).Decode(token)
+	token.GeneratedAt = time.Now()
 
 	return token
 }
 
 func (s *Spotify) FetchPlaylistsFromUser() {
-
-	type webApiReponse struct {
-		Href     string                 `json:"href"`
-		Items    []PlaylistItemResponse `json:"items"`
-		Limit    int                    `json:"limit"`
-		Next     string                 `json:"next"`
-		Offset   int                    `json:"offset"`
-		Previous string                 `json:"previous"`
-	}
-
-	var playlists []PlaylistItemResponse
-	var playlistsApiResponse webApiReponse
+	var playlists []dtos.PlaylistItemResponse
+	var playlistsApiResponse dtos.UserPlaylistsApiReponse
 
 	webApiRequest := func(path string) *http.Response {
 		if path == "" {
@@ -116,7 +86,7 @@ func (s *Spotify) FetchPlaylistsFromUser() {
 	for {
 		if playlistsApiResponse.Href != "" && playlistsApiResponse.Next != "" {
 			path = playlistsApiResponse.Next
-			playlistsApiResponse = webApiReponse{}
+			playlistsApiResponse = dtos.UserPlaylistsApiReponse{}
 		}
 
 		apiResponse := webApiRequest(path)
@@ -136,7 +106,7 @@ func (s *Spotify) FetchPlaylistsFromUser() {
 
 func (s *Spotify) GetPlaylistById(id string) {
 
-	playlist := PlaylistApiResponse{}
+	playlist := dtos.PlaylistApiResponse{}
 	webPlaylistApiRequest := func(id string) *http.Response {
 		path := fmt.Sprintf("https://api.spotify.com/v1/playlists/%s", id)
 		bearerToken := fmt.Sprintf("Bearer %s", s.AccessToken.Token)

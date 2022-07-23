@@ -1,7 +1,7 @@
 package models
 
 import (
-	spotify "github.com/natantn/SpotPlayMe/integrations/spotify"
+	"github.com/natantn/SpotPlayMe/dtos"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ type Playlist struct {
 	Musics []Music `gorm:"many2many:playlist_musics;"`
 }
 
-func (p *Playlist) FillFetchedPlaylist(pf *spotify.PlaylistApiResponse, musics *[]Music) (hasChanged bool) {
+func (p *Playlist) FillFetchedPlaylist(pf *dtos.PlaylistApiResponse, musics *[]Music) (hasChanged bool) {
 	hasChanged = false
 	if p.Title != pf.Name {
 		p.Title = pf.Name
