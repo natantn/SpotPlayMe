@@ -15,6 +15,7 @@ func GetToken(c *gin.Context) {
 
 func SyncPlaylists(c *gin.Context) {
 	spotifyContext := services.GetSpotifyContext()
+	spotifyContext.FetchPlaylistsFromUser()
 	DatabasePlaylists, err := services.FetchPlaylists(spotifyContext)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
